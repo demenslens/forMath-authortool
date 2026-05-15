@@ -1,0 +1,1791 @@
+/* ─── Design tokens ───────────────────────────────────────────────── */
+:root {
+    /* Warme off-white papieren achtergrond */
+    --bg:            #f6f4ed;
+    --bg-panel:      #fbfaf5;
+    --bg-sunken:     #ede9dd;
+
+    /* Inkt */
+    --ink:           #1c1f26;
+    --ink-soft:      #4d5260;
+    --ink-dim:       #87889a;
+
+    /* Lijnen — dun, kalm */
+    --rule:          #dcd7c6;
+    --rule-strong:   #b8b09a;
+
+    /* Accent: mosterd-oker */
+    --accent:        #ae7a15;
+    --accent-ink:    #6a4807;
+    --accent-soft:   #efe0b6;
+
+    /* Feedback */
+    --ok:            #2f6d3f;
+    --ok-soft:       #dcead0;
+    --warn:          #a25d09;
+    --warn-soft:     #f5e4c4;
+    --err:           #983018;
+    --err-soft:      #f4d6ce;
+
+    --font-display:  'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --font-ui:       'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono:     'JetBrains Mono', 'Fira Code', Menlo, monospace;
+
+    --radius:        4px;
+    --radius-lg:     8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Zorg dat het HTML5 `hidden`-attribuut altijd wint van class-regels die
+   `display: <iets>` zetten. Voorkomt bugs zoals: een dialog met
+   .dialog-overlay { display: flex } die `hidden` negeert. */
+[hidden] { display: none !important; }
+
+html, body {
+    height: 100%;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────── */
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 18px 28px 14px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
+}
+
+.brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    color: var(--accent);
+    transform: translateY(1px);
+    flex-shrink: 0;
+}
+
+.brand-mark svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+}
+
+.brand-sub {
+    font-family: var(--font-ui);
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--ink-dim);
+    margin-left: 4px;
+    letter-spacing: 0.02em;
+}
+
+.header-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    letter-spacing: 0.02em;
+}
+
+.header-meta .sep {
+    margin: 0 8px;
+    color: var(--rule-strong);
+}
+
+/* ─── Main layout ─────────────────────────────────────────────────── */
+
+.app-main {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "opgaven  input     inspector"
+        "opgaven  result    inspector";
+    gap: 18px;
+    padding: 22px 28px 28px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Varianten: linker en/of rechter kolom ingeklapt */
+.app-main.opgaven-collapsed {
+    grid-template-columns: 40px 1fr 320px;
+}
+.app-main.inspector-collapsed {
+    grid-template-columns: 320px 1fr 40px;
+}
+.app-main.opgaven-collapsed.inspector-collapsed {
+    grid-template-columns: 40px 1fr 40px;
+}
+
+.opgave-lijst   { grid-area: opgaven; }
+.input-panel    { grid-area: input; }
+.result-panel   { grid-area: result; }
+.inspector      { grid-area: inspector; }
+
+/* Rails hergebruiken dezelfde grid-area's als hun bijbehorende panel */
+#ol-rail         { grid-area: opgaven; }
+#inspector-rail  { grid-area: inspector; }
+
+@media (max-width: 1100px) {
+    .app-main,
+    .app-main.opgaven-collapsed,
+    .app-main.inspector-collapsed,
+    .app-main.opgaven-collapsed.inspector-collapsed {
+        grid-template-columns: 1fr 320px;
+        grid-template-areas:
+            "opgaven  opgaven"
+            "input    inspector"
+            "result   inspector";
+    }
+    .app-main.inspector-collapsed {
+        grid-template-columns: 1fr 40px;
+    }
+}
+
+@media (max-width: 960px) {
+    .app-main,
+    .app-main.opgaven-collapsed,
+    .app-main.inspector-collapsed,
+    .app-main.opgaven-collapsed.inspector-collapsed {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "opgaven"
+            "input"
+            "result"
+            "inspector";
+    }
+}
+
+/* ─── Input panel ─────────────────────────────────────────────────── */
+
+.input-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px 16px;
+}
+
+.input-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+}
+
+.input-label {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+}
+
+/* Opdracht-dropdown (keuze "Reken uit" / "Vereenvoudig") */
+.opdracht-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.opdracht-select {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 5px 28px 5px 10px;
+    cursor: pointer;
+    /* Native pijltje behouden via appearance, maar iets strakker */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%234d5260' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+    transition: border-color .15s, background-color .15s;
+}
+
+.opdracht-select:hover {
+    border-color: var(--rule-strong);
+    background-color: var(--bg);
+}
+
+.opdracht-select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.opdracht-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Mode toggle (MathLive / Tekst) */
+.mode-toggle {
+    display: inline-flex;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.mode-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 12px;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: color .15s, background .15s;
+}
+
+.mode-btn:hover { color: var(--ink); }
+
+.mode-btn.is-active {
+    background: var(--ink);
+    color: var(--bg);
+}
+
+/* Input field (MathLive + tekst fallback) */
+.input-field-wrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+math-field {
+    display: block;
+    width: 100%;
+    font-size: 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: #fff;
+    min-height: 64px;
+    color: var(--ink);
+    font-family: var(--font-display);
+    transition: border-color .15s, box-shadow .15s;
+}
+
+math-field:focus,
+math-field[data-focused="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+}
+
+math-field::part(menu-toggle),
+math-field::part(virtual-keyboard-toggle) { display: none !important; }
+
+#text-input {
+    display: none;
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: #fff;
+    min-height: 64px;
+    color: var(--ink);
+    transition: border-color .15s, box-shadow .15s;
+}
+
+#text-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+}
+
+body.text-mode math-field { display: none; }
+body.text-mode #text-input { display: block; }
+
+/* Action row */
+.action-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    padding: 8px 18px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .15s, border-color .15s, color .15s, transform .1s;
+    line-height: 1.2;
+}
+
+.btn:active:not(:disabled) { transform: translateY(1px); }
+
+.btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+}
+
+.btn-primary .btn-kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.15);
+    color: var(--accent-soft);
+    font-weight: 400;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: var(--ink);
+    border-color: var(--rule-strong);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-sunken);
+    border-color: var(--ink-soft);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--ink-dim);
+    border-color: transparent;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    color: var(--ink);
+    background: var(--bg-sunken);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Status — inline in action row, slank */
+.status {
+    flex: 1;
+    margin-left: auto;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    transition: background .2s;
+}
+
+.status:empty { padding: 0; min-height: 0; }
+
+.status.info    { background: #eef3fa; color: #2d4a6b; justify-content: flex-start; }
+.status.success { background: var(--ok-soft); color: var(--ok); justify-content: flex-start; }
+.status.error {
+    background: var(--err-soft);
+    color: var(--err);
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    flex-basis: 100%;
+    margin-left: 0;
+    margin-top: 6px;
+}
+
+.status .error-snippet {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(152,48,24,0.25);
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--ink);
+    width: 100%;
+    line-height: 1.4;
+}
+
+.status .error-hint {
+    color: var(--warn);
+    font-size: 12.5px;
+}
+
+.spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--rule);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: -2px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Result panel ────────────────────────────────────────────────── */
+
+.result-panel {
+    /* Gebruiker-verzoek: geen grijs/licht vlak rond het schema */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 18px 0 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.result-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.zoom-controls {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 3px;
+}
+
+.zoom-btn {
+    border: none;
+    background: transparent;
+    width: 26px;
+    height: 24px;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    color: var(--ink-soft);
+    border-radius: 999px;
+    cursor: pointer;
+    line-height: 1;
+    transition: background .15s, color .15s;
+}
+
+.zoom-btn-wide {
+    width: auto;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.zoom-btn:hover { background: #fff; color: var(--ink); }
+
+.zoom-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    padding: 0 6px;
+    min-width: 38px;
+    text-align: center;
+}
+
+/* SVG container */
+#svg-wrapper {
+    flex: 1;
+    position: relative;
+    background: #fff;
+    border: none;
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-height: 240px;
+}
+
+#svg-container {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    cursor: grab;
+    position: absolute;
+    inset: 0;
+    padding-left: 20px;
+    /* Bewust geen flex: bij grote SVG's centreert flex zo dat de top
+       buiten beeld valt en niet meer scrollbaar is. Met block + overflow
+       auto begint de SVG linksboven en is alles te bereiken via scroll.
+       Centreren voor kleine SVG's gebeurt op #svg-inner via margin auto. */
+}
+#svg-container.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+
+#svg-container:active { cursor: grabbing; }
+
+#svg-inner {
+    transform-origin: 0 0;
+    transition: transform 0.15s ease-out;
+}
+
+#placeholder-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    color: var(--ink-dim);
+}
+
+.placeholder-big {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ink-soft);
+    font-weight: 400;
+}
+
+.placeholder-sub {
+    font-size: 13px;
+    color: var(--ink-dim);
+}
+
+.placeholder-sub kbd {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    margin: 0 2px;
+}
+
+#svg-container.is-empty #svg-inner { display: none; }
+#svg-container:not(.is-empty) #placeholder-text { display: none; }
+
+/* Pipeline info samenvatting */
+.pipeline-info {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+}
+
+.pipeline-info dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 14px;
+    font-size: 13px;
+}
+
+.pipeline-info dt {
+    color: var(--ink-dim);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    font-size: 11px;
+    align-self: center;
+}
+
+/* Klikbare labels die de waarde van het bijbehorende veld kopiëren */
+.pipeline-info dt.info-label-copy {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+.pipeline-info dt.info-label-copy:hover {
+    color: var(--accent, #ae7a15);
+}
+/* Visuele bevestiging na een succesvolle kopieer-actie */
+.pipeline-info dt.info-label-copy.is-copied {
+    color: var(--accent, #ae7a15);
+}
+.pipeline-info dt.info-label-copy.is-copied::after {
+    content: " ✓ gekopieerd";
+    font-size: 10px;
+    margin-left: 4px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.pipeline-info dd {
+    color: var(--ink);
+    word-break: break-all;
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+
+/* ─── Opgave-lijst (linker inspector) ─────────────────────────────── */
+
+.opgave-lijst {
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ol-placeholder {
+    padding: 18px 16px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    text-align: center;
+}
+
+.ol-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ol-item {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 10px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.ol-item:hover {
+    background: var(--bg-sunken);
+    color: var(--ink);
+    border-color: var(--rule-strong);
+}
+
+.ol-item.is-selected {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+}
+
+.ol-item.is-corrupt {
+    color: var(--err);
+    border-color: var(--rule-strong);
+    border-style: dashed;
+}
+
+/* ─── Folder-boom in opgavenlijst ──────────────────────────────────── */
+
+/* Eén folder-regel: driehoekje + naam + count */
+.ol-folder {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    user-select: none;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background 0.1s, border-color 0.1s;
+}
+
+.ol-folder:hover {
+    background: var(--bg-sunken);
+}
+
+.ol-folder.is-selected {
+    background: var(--bg-sunken);
+    border-color: var(--accent, #ae7a15);
+}
+
+/* Driehoekje voor klap; aparte hit-zone */
+.ol-folder-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--ink-soft);
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+}
+
+.ol-folder.is-open > .ol-folder-arrow {
+    transform: rotate(90deg);
+}
+
+/* Folder-naam: vult de rest, klikbaar voor selectie */
+.ol-folder-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Aantal opgaven-badge */
+.ol-folder-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    background: var(--bg-sunken);
+    padding: 1px 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+/* Container voor opgaven onder een geopende folder */
+.ol-folder-contents {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-left: 22px;       /* inspring onder driehoekje */
+    margin-top: 3px;
+    margin-bottom: 6px;
+}
+
+/* Opgaven binnen een folder krijgen iets kleiner formaat */
+.ol-folder-contents .ol-item {
+    font-size: 11px;
+    padding: 5px 8px;
+}
+
+/* Boodschap voor lege folder */
+.ol-folder-empty {
+    margin-left: 22px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--ink-dim);
+    border: 1px dashed var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg-sunken);
+}
+
+/* ─── View-toggle (SVG / JSON) ────────────────────────────────────── */
+
+.view-toggle {
+    display: inline-flex;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+    margin-right: auto;
+    margin-left: 14px;
+}
+
+.view-btn {
+    border: none;
+    background: transparent;
+    padding: 3px 12px;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .15s, background .15s;
+}
+
+.view-btn:hover { color: var(--ink); }
+
+.view-btn.is-active {
+    background: var(--ink);
+    color: var(--bg);
+}
+
+/* ─── JSON-view ───────────────────────────────────────────────────── */
+
+.json-view {
+    margin: 0;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink);
+    overflow: auto;
+    max-height: 100%;
+    white-space: pre;
+    tab-size: 2;
+}
+
+/* ─── Danger button variant ──────────────────────────────────────── */
+
+.btn-danger {
+    color: var(--err);
+    border-color: var(--rule);
+}
+.btn-danger:hover {
+    background: var(--err-soft);
+    border-color: var(--rule-strong);
+    color: var(--err);
+}
+.btn-primary.btn-danger {
+    background: var(--err);
+    color: #fff;
+    border-color: var(--err);
+}
+.btn-primary.btn-danger:hover {
+    background: #7f1f1f;
+    border-color: #7f1f1f;
+}
+
+/* ─── Dialog helper: choice & help ────────────────────────────────── */
+
+.dialog-choice {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dialog-choice-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.dialog-radio {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.dialog-radio input {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.dialog-radio-help {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.dialog-help {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+/* ─── Inspector (rechter paneel) ──────────────────────────────────── */
+
+.inspector {
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.inspector-head {
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.inspector-collapse-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    padding: 0;
+}
+
+.inspector-collapse-btn:hover {
+    background: var(--bg-sunken);
+    color: var(--ink);
+    border-color: var(--rule-strong);
+}
+
+.inspector-collapse-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Smalle rail wanneer inspector ingeklapt is */
+.inspector-rail {
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    padding: 14px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: background .15s, color .15s, border-color .15s;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    line-height: 1;
+}
+
+.inspector-rail:hover {
+    background: var(--bg-sunken);
+    color: var(--ink);
+    border-color: var(--rule-strong);
+}
+
+.inspector-rail:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.inspector-rail-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    color: var(--ink-dim);
+}
+
+/* Op smal scherm is de rail horizontaal i.p.v. verticaal */
+@media (max-width: 960px) {
+    .inspector-rail {
+        flex-direction: row;
+        padding: 10px 16px;
+        justify-content: center;
+    }
+    .inspector-rail-label {
+        writing-mode: horizontal-tb;
+        transform: none;
+    }
+}
+
+.inspector-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+}
+
+.inspector-subtitle {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 2px;
+}
+
+.inspector-body {
+    padding: 14px 18px 18px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inspector-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+/* Toggle-switch voor booleans */
+.switch-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+}
+
+.switch-row-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+}
+
+.switch-row-help {
+    font-size: 12px;
+    color: var(--ink-dim);
+    line-height: 1.4;
+}
+
+.switch {
+    flex-shrink: 0;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--rule-strong);
+    border-radius: 999px;
+    transition: background .15s;
+}
+
+.switch-slider::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .15s;
+}
+
+.switch input:checked + .switch-slider {
+    background: var(--accent);
+}
+
+.switch input:checked + .switch-slider::before {
+    transform: translateX(16px);
+}
+
+/* Mathblock-lijst */
+.mb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mb-item {
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+}
+
+.mb-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+
+.mb-id {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.mb-step {
+    font-size: 11px;
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+}
+
+.mb-expr {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    word-break: break-all;
+}
+
+.klasse-choice {
+    display: inline-flex;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.klasse-btn {
+    border: none;
+    background: transparent;
+    padding: 3px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .15s, background .15s;
+}
+
+.klasse-btn:hover { color: var(--ink); }
+
+.klasse-btn.is-active {
+    background: var(--ink);
+    color: var(--bg);
+}
+
+.inspector-placeholder {
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 13px;
+    padding: 40px 12px;
+    line-height: 1.6;
+}
+
+/* ─── Dialog ──────────────────────────────────────────────────────── */
+
+.dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 31, 38, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: overlay-fade 0.15s ease-out;
+}
+
+/* HTML5 hidden-attribuut: anders overschrijft .dialog-overlay { display: flex }
+   de user-agent regel `[hidden] { display: none }` en blijft de dialoog zichtbaar. */
+.dialog-overlay[hidden] { display: none; }
+
+@keyframes overlay-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.dialog {
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.3);
+    width: 540px;
+    max-width: calc(100vw - 40px);
+    animation: dialog-in 0.2s ease-out;
+}
+
+@keyframes dialog-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.dialog-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px 12px;
+    border-bottom: 1px solid var(--rule);
+}
+
+.dialog-head h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.dialog-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--ink-dim);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius);
+    transition: background .15s, color .15s;
+}
+
+.dialog-close:hover {
+    background: var(--bg-sunken);
+    color: var(--ink);
+}
+
+.dialog-body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialog-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.dialog-key {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-dim);
+}
+
+.dialog-val {
+    word-break: break-all;
+    padding: 6px 10px;
+    background: var(--bg-sunken);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink);
+}
+
+.dialog-warning {
+    background: var(--warn-soft);
+    border: 1px solid rgba(162, 93, 9, 0.3);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--warn);
+}
+
+.dialog-warning strong {
+    font-weight: 600;
+    color: var(--err);
+}
+
+.dialog-warning ul {
+    margin: 6px 0 6px 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink);
+}
+
+.dialog-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 22px 18px;
+    border-top: 1px solid var(--rule);
+}
+
+/* ─── Statische meta-labels in topbalk ─────────────────────────────
+ * Tonen de huidige metadata van een opgave als kort 'label: waarde' paar.
+ * Wraps automatisch bij een smal venster.
+ */
+
+.meta-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+    align-items: center;
+    flex: 1;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.meta-label-pair {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.meta-label-key {
+    color: var(--ink-dim);
+    font-weight: 500;
+}
+
+.meta-label-val {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+/* ─── Metadata-modaal (Opslaan-formulier) ──────────────────────────
+ * Een grotere dialog met 6 velden. Layout: één veld per regel.
+ */
+
+.metadata-modal {
+    width: 480px;
+    max-width: calc(100vw - 40px);
+}
+
+.metadata-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.metadata-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metadata-field .dialog-label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+}
+
+.metadata-field .dialog-input {
+    font-size: 13px;
+    padding: 6px 10px;
+}
+
+.metadata-field textarea.dialog-input {
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* ─── Contextmenu (rechtsklik op opgave) ─────────────────────────── */
+
+.contextmenu {
+    position: fixed;
+    z-index: 10000;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px -4px rgba(0,0,0,0.2);
+    min-width: 160px;
+    padding: 4px;
+}
+
+.contextmenu[hidden] { display: none; }
+
+.contextmenu-item {
+    display: block;
+    width: 100%;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.contextmenu-item:hover {
+    background: var(--bg-sunken);
+}
+
+/* ─── Integriteit-fout dialog ──────────────────────────────────────
+ * Wordt getoond bij /api/export_json response met integrity_errors.
+ * Lijst met fouten in rood, optionele waarschuwingen daaronder.
+ */
+
+.integrity-errors,
+.integrity-warnings {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.integrity-errors li,
+.integrity-warnings li {
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.4;
+    border-left: 3px solid;
+}
+
+.integrity-errors li {
+    background: #fdecea;
+    color: #7f0000;
+    border-left-color: #c62828;
+}
+
+.integrity-warnings li {
+    background: #fff4e0;
+    color: #6a4a08;
+    border-left-color: #ae7a15;
+}
+
+.integrity-warnings-wrap {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+}
+
+/* ─── Help-overlay (sub-ronde punt 2) ──────────────────────────────
+ *
+ * Semi-transparante waas over de hele app, met labels die via dunne
+ * SVG-lijntjes wijzen naar UI-onderdelen. Klik ergens sluit het.
+ *
+ * Layer-volgorde (van laag naar hoog z-index):
+ *   - .help-overlay         8000  (de waas zelf)
+ *   - .help-overlay-svg     8001  (lijntjes)
+ *   - .help-overlay-labels  8002  (de labels — boven de lijntjes)
+ */
+
+.help-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: rgba(40, 40, 40, 0.15);
+    cursor: pointer;
+    animation: help-overlay-fade-in 0.2s ease-out;
+}
+
+.help-overlay[hidden] { display: none; }
+
+@keyframes help-overlay-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.help-overlay-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8001;
+    pointer-events: none;  /* lijnen vangen geen clicks */
+}
+
+.help-overlay-svg line {
+    stroke: #c62828;       /* rood — duidelijk zichtbaar op subtiele waas */
+    stroke-width: 1.2;
+    stroke-dasharray: 3 3;
+    opacity: 0.9;
+}
+
+.help-overlay-svg circle {
+    fill: #c62828;         /* rood, matchend aan de lijn */
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
+.help-overlay-labels {
+    position: absolute;
+    inset: 0;
+    z-index: 8002;
+    pointer-events: none;
+}
+
+.help-label {
+    position: absolute;
+    background: #f6f4ed;   /* paper bg */
+    border: 1px solid #ae7a15;
+    border-radius: 6px;
+    padding: 6px 10px;
+    max-width: 220px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #2a2a2a;
+    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.25);
+    pointer-events: auto;  /* labels vangen muis-events zodat slepen werkt */
+    cursor: grab;
+    user-select: none;     /* tekst niet selecteren tijdens slepen */
+}
+
+.help-label.is-dragging {
+    cursor: grabbing;
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.4);
+}
+
+.help-label-key {
+    display: block;
+    font-weight: 600;
+    color: #ae7a15;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.help-overlay-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 12px;
+    background: rgba(0,0,0,0.4);
+    padding: 6px 14px;
+    border-radius: 999px;
+    z-index: 8003;
+    pointer-events: none;
+}
+
+/* Help-knop in header (?-icoon). Stijl exact als settings-knop. */
+.header-help-btn {
+    /* erft alles van .header-settings-btn */
+}
+
+/* ─── Settings modal met sidebar ──────────────────────────────────── */
+
+/* Settings-modal is breder dan de standaard dialog vanwege sidebar */
+.settings-modal {
+    width: 760px;
+    max-width: calc(100vw - 40px);
+}
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: 380px;
+    max-height: 70vh;
+}
+
+.settings-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 8px;
+    border-right: 1px solid var(--rule);
+    background: var(--bg-sunken);
+    overflow-y: auto;
+}
+
+.settings-nav-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+.settings-nav-item:hover {
+    background: var(--bg);
+}
+
+.settings-nav-item.is-active {
+    background: var(--accent, #ae7a15);
+    color: #fff;
+    font-weight: 500;
+}
+
+.settings-content {
+    padding: 20px 26px;
+    overflow-y: auto;
+}
+
+/* Elke sectie is een container die alleen actief getoond wordt */
+.settings-section {
+    display: none;
+}
+
+.settings-section.is-active {
+    display: block;
+}
+
+.settings-section-footer {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.settings-placeholder {
+    color: var(--ink-dim);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+/* Storage-sectie: folder-lijst en actiebalk */
+.storage-folder-list {
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg);
+    margin-top: 8px;
+    margin-bottom: 14px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.storage-folder-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--rule);
+    user-select: none;
+}
+
+.storage-folder-row:last-child {
+    border-bottom: 0;
+}
+
+.storage-folder-row:hover {
+    background: var(--bg-sunken);
+}
+
+.storage-folder-row.is-selected {
+    background: var(--bg-sunken);
+    border-color: var(--accent, #ae7a15);
+}
+
+.storage-folder-row.is-selected::before {
+    content: '';
+    width: 3px;
+    height: 18px;
+    background: var(--accent, #ae7a15);
+    border-radius: 2px;
+    margin-right: 4px;
+    margin-left: -6px;
+}
+
+.storage-folder-row-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.storage-folder-row-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    background: var(--bg-sunken);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.storage-folder-empty-list {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 13px;
+}
+
+.storage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.storage-actions .btn {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+.storage-actions .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+    .app-header { padding: 14px 16px 10px; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .app-main { padding: 14px 16px 20px; gap: 12px; }
+    .input-panel, .result-panel { padding: 14px; }
+    .action-row { gap: 6px; }
+    .action-row .btn { flex: 1; justify-content: center; }
+    .action-row .status { flex-basis: 100%; margin-left: 0; }
+    .dialog-row { grid-template-columns: 1fr; gap: 4px; }
+}

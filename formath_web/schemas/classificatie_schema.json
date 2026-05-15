@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://formath.local/schemas/classificatie-1.0.json",
+  "title": "ForMath Opgave-classificatie",
+  "description": "Classificatie-metadata voor wiskundeopgaven. Alle velden zijn optioneel; ontbrekende velden betekenen 'niet geclassificeerd'. Schema is additief: nieuwe velden mogen later worden toegevoegd, bestaande velden worden nooit verwijderd of van betekenis veranderd.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schema_versie": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Versie van het classificatieschema waarmee deze opgave is getagd. Niet verplicht voor backward compatibility."
+    },
+    "domein": {
+      "type": ["string", "null"],
+      "enum": [
+        "getallen",
+        "algebra",
+        "meetkunde",
+        "verbanden",
+        "differentiaalrekening",
+        "goniometrie",
+        "statistiek",
+        "kansrekening",
+        "analytische_meetkunde",
+        "rijen",
+        "logica",
+        null
+      ],
+      "description": "Hoofddomein binnen de wiskunde."
+    },
+    "onderwerp": {
+      "type": ["string", "null"],
+      "description": "Onderwerp binnen het domein, bv. 'breuken', 'kwadratische_vergelijkingen', 'sinusregel'. Vrije string maar bij voorkeur uit een gecontroleerde lijst per domein (snake_case)."
+    },
+    "subonderwerp": {
+      "type": ["string", "null"],
+      "description": "Verfijning van onderwerp, bv. 'optellen_aftrekken' bij onderwerp 'breuken'."
+    },
+    "type": {
+      "type": ["string", "null"],
+      "enum": [
+        "procedureel",
+        "gestructureerd",
+        "toepassing",
+        "bewijs",
+        "onderzoek",
+        "redeneren",
+        null
+      ],
+      "description": "Opgavetype op meta-niveau. Zie handleiding voor definities (gebaseerd op Smith & Stein, 1998)."
+    },
+    "niveau_rtti": {
+      "type": ["string", "null"],
+      "enum": ["R", "T1", "T2", "I", null],
+      "description": "RTTI-niveau: Reproductie, Toepassing 1 (bekende context), Toepassing 2 (nieuwe context), Inzicht. Bron: Docters van Leeuwen."
+    },
+    "niveau_bloom": {
+      "type": ["string", "null"],
+      "enum": [
+        "onthouden",
+        "begrijpen",
+        "toepassen",
+        "analyseren",
+        "evalueren",
+        "creeren",
+        null
+      ],
+      "description": "Optioneel: cognitief niveau volgens Bloom (Anderson & Krathwohl, 2001). Aanvullend op RTTI, niet vervangend."
+    },
+    "moeilijkheid": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Subjectieve moeilijkheidsschaal 1 (zeer makkelijk) t/m 5 (zeer moeilijk), onafhankelijk van RTTI/Bloom."
+    },
+    "leerjaar": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 6
+      },
+      "uniqueItems": true,
+      "description": "Leerjaren waarvoor de opgave geschikt is (1 t/m 6 voor v.o.). Een opgave kan meerdere leerjaren bedienen."
+    },
+    "stroom": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "enum": [
+          "vmbo_bb",
+          "vmbo_kb",
+          "vmbo_gt",
+          "havo",
+          "vwo",
+          "wiskunde_a",
+          "wiskunde_b",
+          "wiskunde_c",
+          "wiskunde_d"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "Onderwijsstromen/keuzevakken waarvoor de opgave geschikt is."
+    },
+    "referentieniveau": {
+      "type": ["string", "null"],
+      "enum": ["1F", "1S", "2F", "2S", "3F", "3S", null],
+      "description": "Referentieniveau rekenen volgens commissie-Meijerink / SLO. Alleen voor opgaven binnen het bereik van het referentiekader (po t/m onderbouw v.o./mbo)."
+    },
+    "referentiedomein": {
+      "type": ["string", "null"],
+      "enum": [
+        "getallen",
+        "verhoudingen",
+        "meten_meetkunde",
+        "verbanden",
+        null
+      ],
+      "description": "Optioneel domein binnen het referentiekader rekenen (alleen invullen als referentieniveau is gezet)."
+    },
+    "examendomein": {
+      "type": ["string", "null"],
+      "enum": ["A", "B", "C", "D", "E", "F", "G", null],
+      "description": "Domeinletter uit het examenprogramma havo/vwo (CvTE). Alleen voor bovenbouw-stof."
+    },
+    "tags": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]+$"
+      },
+      "uniqueItems": true,
+      "description": "Vrije tags in snake_case voor fijnmazige eigenschappen, bv. 'kgv', 'abc_formule', 'discriminant_nul'."
+    },
+    "bron": {
+      "type": ["string", "null"],
+      "description": "Herkomst van de opgave: 'eigen', 'examen_2019_havo_b', 'getal_en_ruimte_havo_3', etc. Vrije string."
+    },
+    "auteur": {
+      "type": ["string", "null"],
+      "description": "Persoon die de classificatie heeft toegekend (initialen of naam)."
+    },
+    "geclassificeerd_op": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Datum waarop de classificatie is toegekend (ISO 8601)."
+    },
+    "opmerkingen": {
+      "type": ["string", "null"],
+      "description": "Vrije tekst voor toelichting bij niet-evidente classificatiekeuzes."
+    }
+  }
+}

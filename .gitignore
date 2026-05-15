@@ -1,0 +1,44 @@
+# ─── macOS ──────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ─── Python ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# ─── IDE / editors ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Persoonlijke configuratie ──────────────────────────────────────
+# Bevat het pad naar de lokale opgaven-folder; verschilt per gebruiker.
+# Gebruik config.json.example als template.
+python_bestanden/config.json
+
+# ─── Backups en archieven ───────────────────────────────────────────
+*.zip
+*.bak
+*.orig
+_archief/
+Archief*/
+
+# ─── Logs / runtime ─────────────────────────────────────────────────
+*.log

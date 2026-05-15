@@ -1,0 +1,107 @@
+{
+  "_comment": "ForMath Hints Templates - aanpasbare teksten voor hints en feedback per mathblock type. Plaatsing: in dezelfde directory als hints_generator.py. Plaatshouders tussen accolades worden runtime ingevuld door hints_generator.py.",
+  "_version": "1.0",
+  "_placeholders": {
+    "{n}": "aantal operanden (bij MANIFOLD_OP en MATROESJKA_OP)",
+    "{exp}": "exponent (bij POWER)",
+    "{idx}": "index van de wortel (bij ROOT)",
+    "{ggd}": "grootste gemene deler (bij SIMPLIFY_OP)",
+    "{rt}": "ruwe teller",
+    "{rn}": "ruwe noemer",
+    "{vt}": "vereenvoudigde teller",
+    "{vn}": "vereenvoudigde noemer",
+    "{geheel}": "het hele getal in een gemengd getal",
+    "{mt}": "teller in een gemengd getal",
+    "{mn}": "noemer in een gemengd getal",
+    "{abs_rt}": "absolute waarde van ruwe teller",
+    "{int_rn}": "ruwe noemer als integer",
+    "{int_geh}": "geheel als integer",
+    "{abs_mt}": "absolute waarde van mt"
+  },
+
+  "binary_op": {
+    "+": {
+      "wat": "Tel de twee getallen bij elkaar op.",
+      "hoe_zonder_breuk": "Voeg de twee getallen samen tot één som.",
+      "hoe_met_breuk": "Als de noemers gelijk zijn: tel de tellers op en houd de noemer. Als de noemers verschillen: maak ze eerst gelijknamig met behulp van het KGV.",
+      "let_op_met_breuk": "Vergeet niet de noemers gelijk te maken voordat je de tellers optelt."
+    },
+    "×": {
+      "wat": "Vermenigvuldig de twee getallen met elkaar.",
+      "hoe_zonder_breuk": "Bereken het product van de twee factoren.",
+      "hoe_met_breuk": "Vermenigvuldig de tellers en de noemers afzonderlijk: a/b × c/d = (a×c)/(b×d).",
+      "let_op_met_breuk": "Het kan handig zijn om eerst kruiselings te vereenvoudigen voor kleinere getallen."
+    },
+    ":": {
+      "wat": "Deel het eerste getal door het tweede.",
+      "hoe_zonder_breuk": "Deel de teller door de noemer.",
+      "hoe_met_breuk": "Delen door een breuk = vermenigvuldigen met het omgekeerde: a/b : c/d = a/b × d/c.",
+      "let_op_met_breuk": "De rechter breuk omkeren is alleen toegestaan bij delen, niet bij andere bewerkingen."
+    },
+    "let_op_negatief": "Het minteken vóór deze bewerking werkt op het hele resultaat."
+  },
+
+  "manifold_op": {
+    "+": {
+      "wat": "Tel deze {n} getallen bij elkaar op.",
+      "hoe_zonder_breuk": "De volgorde van optellen is vrij; je mag eerst de getallen groeperen die samen makkelijke uitkomsten geven.",
+      "hoe_met_breuk": "Maak alle breuken gelijknamig met behulp van het KGV van alle noemers, tel daarna de tellers op.",
+      "let_op_met_breuk": "Bij meerdere breuken hoef je het KGV maar één keer te bepalen — daarna kun je alle tellers tegelijk omrekenen."
+    },
+    "×": {
+      "wat": "Vermenigvuldig deze {n} factoren met elkaar.",
+      "hoe_zonder_breuk": "De volgorde van vermenigvuldigen is vrij; groepeer factoren die samen ronde getallen geven.",
+      "hoe_met_breuk": "Vermenigvuldig alle tellers met elkaar en alle noemers met elkaar: a/b × c/d × e/f = (a×c×e)/(b×d×f).",
+      "let_op_met_breuk": "Vereenvoudig waar mogelijk vóór je vermenigvuldigt — kruiselings tussen teller en noemer van verschillende breuken voorkomt grote tussenwaarden."
+    },
+    "let_op_negatief": "Het minteken vóór deze manifold werkt op het hele resultaat."
+  },
+
+  "power": {
+    "wat": "Verhef het grondtal tot de macht {exp}.",
+    "hoe": "Vermenigvuldig het grondtal {exp} keer met zichzelf.",
+    "let_op_negatief_even": "Een negatief grondtal met een even exponent geeft een positief resultaat.",
+    "let_op_negatief_oneven": "Een negatief grondtal met een oneven exponent geeft een negatief resultaat.",
+    "let_op_breuk": "Bij een breuk: verhef zowel de teller als de noemer tot de macht {exp}.",
+    "let_op_negatief": "Het minteken vóór de macht werkt op het hele resultaat."
+  },
+
+  "root": {
+    "vierkantswortel": {
+      "wat": "Trek de vierkantswortel.",
+      "hoe": "Zoek het getal dat met zichzelf vermenigvuldigd het radicand geeft."
+    },
+    "machtswortel": {
+      "wat": "Trek de {idx}-de machtswortel.",
+      "hoe": "Zoek het getal dat tot de macht {idx} verheven het radicand geeft."
+    },
+    "let_op_breuk": "Bij een breuk: trek de wortel uit de teller en de noemer apart."
+  },
+
+  "simplify_op": {
+    "wat": "Vereenvoudig de breuk.",
+    "hoe": "Bepaal de grootste gemeenschappelijke deler (GGD) van teller en noemer, en deel beide door die GGD. In dit geval: GGD = {ggd}.",
+    "let_op": "Een breuk is volledig vereenvoudigd als de GGD van teller en noemer 1 is.",
+    "voorbeeld": "{rt}/{rn} = ({rt}÷{ggd})/({rn}÷{ggd}) = {vt}/{vn}."
+  },
+
+  "mixed_number_op": {
+    "wat": "Schrijf de oneigenlijke breuk als gemengd getal.",
+    "hoe": "Deel teller door noemer: het quotiënt is het hele getal, de rest is de teller van de overgebleven breuk. De noemer blijft hetzelfde.",
+    "let_op": "Een gemengd getal heeft de vorm \"geheel teller/noemer\" en is alleen zinvol als de teller groter of gelijk is aan de noemer.",
+    "voorbeeld_zonder_rest": "{rt}/{rn}: {abs_rt} ÷ {int_rn} = {int_geh} rest 0, dus {rt}/{rn} = {int_geh}.",
+    "voorbeeld_met_rest": "{rt}/{rn}: {abs_rt} ÷ {int_rn} = {int_geh} rest {abs_mt}, dus {rt}/{rn} = {int_geh} {abs_mt}/{mn}."
+  },
+
+  "matroesjka_op": {
+    "wat": "Werk deze keten van {n} bewerkingen af.",
+    "hoe": "Reken van binnen naar buiten: bereken eerst de binnenste schil (de eerste twee operanden), gebruik die uitkomst als linker operand voor de volgende schil, en ga zo door tot je de buitenste schil hebt bereikt.",
+    "let_op": "Bij delen en vermenigvuldigen achter elkaar is de volgorde belangrijk; je mag NIET eerst alle vermenigvuldigingen doen en dan alle delingen."
+  },
+
+  "feedback": {
+    "bij_correct_root": "Dit is het goede antwoord op het gevraagde, de opgave is klaar.",
+    "bij_correct_tussen": "Correct, ga door met de volgende bewerking.",
+    "bij_fout_algemeen": "Klopt nog niet. Controleer je berekening en probeer het opnieuw."
+  }
+}

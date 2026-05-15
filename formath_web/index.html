@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForMath — Opgave Invoer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-fonts.css">
+    <script defer src="https://unpkg.com/mathlive"></script>
+
+    <link rel="stylesheet" href="app.css">
+
+    <!-- Styling voor de settings-UI, werkt onafhankelijk van app.css -->
+    <style>
+        .header-settings-btn {
+            margin-left: auto !important;
+            margin-right: 20px !important;
+            background: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            color: inherit !important;
+            padding: 10px !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .header-settings-btn svg {
+            width: 28px !important;
+            height: 28px !important;
+            display: block !important;
+        }
+        .header-settings-btn:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+        }
+        .inspector-head-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        /* Statusbalk onderaan het scherm */
+        .app-statusbar {
+            position: fixed !important;
+            left: 0 !important; right: 0 !important; bottom: 0 !important;
+            min-height: 44px !important;
+            background: #1a3a5c !important;
+            color: #eee !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 8px 16px !important;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
+            font-size: 14px !important;
+            border-top: 1px solid rgba(255,255,255,0.1) !important;
+            z-index: 100 !important;
+            gap: 16px !important;
+            box-sizing: border-box !important;
+        }
+        .statusbar-meta {
+            flex: 1 1 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            color: #bcd4e8 !important;
+            flex-wrap: wrap !important;
+            font-size: 14px !important;
+        }
+        .statusbar-meta .sep {
+            color: #6c8aa5 !important;
+            margin: 0 6px !important;
+            font-weight: 300 !important;
+        }
+        .statusbar-meta .sb-key {
+            color: #8aabc7 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin-right: 4px !important;
+            font-weight: 400 !important;
+        }
+        .statusbar-meta .sb-val {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+        }
+        .statusbar-meta .mono {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 13px !important;
+        }
+        .statusbar-meta:empty::before {
+            content: 'Geen actieve opgave' !important;
+            color: #6c8aa5 !important;
+            font-style: italic !important;
+            font-size: 13px !important;
+        }
+        .statusbar-status {
+            flex: 0 0 auto !important;
+            text-align: right !important;
+            color: #ffffff !important;
+            font-size: 13px !important;
+        }
+        .statusbar-status .spinner {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: sb-spin 0.8s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        @keyframes sb-spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Main content hoger zodat statusbalk past */
+        .app-main { margin-bottom: 44px !important; }
+        /* Oude inline status-div verbergen (we gebruiken statusbar) */
+        #status { display: none; }
+
+        /* ── Quick-buttons rij: snelle invoer voor wortels/machten/breuken ── */
+        .quick-buttons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin: 0 0 8px 0;
+            padding: 6px 8px;
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+        }
+        .quick-buttons[hidden] { display: none; }
+
+        .qb {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 30px;
+            padding: 2px 8px;
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.1s, border-color 0.1s;
+        }
+        .qb:hover {
+            background: #f4f4f4;
+            border-color: #999999;
+        }
+        .qb:active {
+            background: #ececec;
+            transform: translateY(1px);
+        }
+
+        /* Subtekens binnen quick-buttons */
+        .qb .qb-icon { font-size: 18px; }
+        .qb .qb-pre {
+            font-size: 11px;
+            margin-right: 1px;
+            position: relative;
+            top: -3px;
+        }
+        .qb .qb-sub {
+            font-size: 11px;
+            margin-left: 1px;
+            color: #888;
+        }
+        .qb .qb-sup {
+            font-size: 11px;
+            position: relative;
+            top: -5px;
+            margin-left: 1px;
+        }
+        .qb .qb-base {
+            font-size: 13px;
+            color: #888;
+        }
+        .qb .qb-pi {
+            font-family: 'Times New Roman', serif;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        /* Mini-breuk in quick-button */
+        .qb-frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            font-size: 11px;
+            color: #888;
+        }
+        .qb-frac-top {
+            border-bottom: 1px solid #1a1a1a;
+            padding: 0 2px 1px;
+        }
+        .qb-frac-bot {
+            padding: 1px 2px 0;
+        }
+
+        /* Visuele scheiding tussen groepen knoppen */
+        .qb-sep {
+            display: inline-block;
+            width: 1px;
+            height: 20px;
+            background: #d4d4d4;
+            margin: 0 4px;
+        }
+        /* π-knop: italic-serif voor wiskundige look */
+        .qb .qb-pi {
+            font-family: 'Times New Roman', 'Cambria Math', serif;
+            font-style: italic;
+            font-size: 18px;
+        }
+        /* Subscript naast π-knop: leesbaar (niet grijs zoals bij wortel) */
+        .qb .qb-pi + .qb-sub {
+            color: #1a1a1a;
+            font-size: 11px;
+            margin-left: 1px;
+        }
+
+        /* ── Randvoorwaarden harmonica (derde sectie, mosterd) ───── */
+        .inspector-subhead-amber {
+            background: #f4ead0;
+            color: #1a1a1a;
+            border-color: #e0d4a0;
+            cursor: pointer;
+        }
+        .inspector-subhead-amber:hover {
+            background: #ebe0c0;
+        }
+
+        .rv-section {
+            font-size: 12px;
+        }
+        .rv-body[hidden] { display: none; }
+        .rv-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding-top: 6px;
+            padding-bottom: 8px;
+        }
+        .rv-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .rv-row:last-of-type {
+            border-bottom: none;
+        }
+        .rv-row-sub {
+            padding-left: 22px;
+            background: #fafafa;
+        }
+        .rv-label {
+            flex: 1 1 auto;
+            font-size: 12px;
+            color: #1a1a1a;
+        }
+        .rv-control {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rv-radio {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .rv-radio input {
+            margin: 0;
+        }
+        .rv-input {
+            width: 46px;
+            padding: 3px 6px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .rv-error {
+            margin: 8px 10px;
+            padding: 6px 10px;
+            background: #fdecea;
+            border: 1px solid #c62828;
+            border-radius: 4px;
+            color: #7f0000;
+            font-size: 12px;
+        }
+        .rv-error ul {
+            margin: 4px 0 0 16px;
+            padding: 0;
+        }
+        .rv-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px 10px 0;
+        }
+        .rv-actions .btn {
+            font-size: 12px !important;
+            padding: 5px 14px !important;
+            min-width: auto !important;
+            background: #ffffff !important;
+            color: #1a1a1a !important;
+            border: 1px solid #ccc !important;
+            font-weight: 500 !important;
+        }
+        .rv-actions .btn:hover {
+            background: #f4f4f4 !important;
+            border-color: #999 !important;
+        }
+        /* Lock-stijl: gelijk aan classificatie */
+        .rv-section.rv-locked .rv-radio,
+        .rv-section.rv-locked .rv-input,
+        .rv-section.rv-locked .rv-actions .btn {
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        /* ── Result-panel: dunne rand + zelfde stijl als input-panel ── */
+        .result-panel {
+            background: var(--bg-panel) !important;
+            border: 1px solid var(--rule) !important;
+            border-radius: var(--radius-lg) !important;
+            padding: 18px 20px 16px !important;
+        }
+        /* ── Witte SVG-wrapper ook een dunne rand zoals de andere vlakken ── */
+        #svg-wrapper {
+            border: 1px solid var(--rule) !important;
+        }
+
+        /* ── Knoppenrij: spacer + uniforme stijl ──────────────────── */
+        .action-spacer {
+            flex: 1 1 auto;
+        }
+
+        /* Override: alle knoppen krijgen lichtgrijze rand. Inactief =
+           uniforme grijze achtergrond, lichtgrijze tekst. Actief = witte
+           achtergrond, zwarte tekst. Geldt voor btn-primary, btn-secondary,
+           btn-ghost — alle drie krijgen hetzelfde gedrag. */
+        .action-row .btn {
+            background: #ffffff !important;
+            color: #1a1a1a !important;
+            border: 1px solid #cccccc !important;
+            font-weight: 500 !important;
+        }
+        .action-row .btn:hover:not(:disabled) {
+            background: #f4f4f4 !important;
+            border-color: #999999 !important;
+        }
+        .action-row .btn:disabled {
+            background: #f0f0f0 !important;
+            color: #999999 !important;
+            border-color: #d4d4d4 !important;
+            opacity: 1 !important;
+            cursor: not-allowed !important;
+        }
+        .action-row .btn-danger:not(:disabled) {
+            color: #c62828 !important;
+        }
+        .action-row .btn-danger:hover:not(:disabled) {
+            background: #fdecea !important;
+            border-color: #c62828 !important;
+        }
+        /* Parse-knop: subtiel kbd-shortcut blokje aanpassen aan witte achtergrond */
+        .action-row #btn-ok .btn-kbd {
+            background: #eaeaea !important;
+            color: #555555 !important;
+        }
+        .action-row #btn-ok:disabled .btn-kbd {
+            background: #e0e0e0 !important;
+            color: #aaaaaa !important;
+        }
+
+        /* ── Inspector subkop (boven hints-accordion en classificatie) ─── */
+        .inspector-subhead {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            user-select: none;
+        }
+        .inspector-subhead-blue {
+            background: #e8f0f8;
+            color: #1a1a1a;
+            border-color: #c7dbec;
+            cursor: pointer;
+        }
+        .inspector-subhead-blue:hover {
+            background: #d8e8f0;
+        }
+        .inspector-subhead-green {
+            background: #d8ecd9;
+            color: #1a1a1a;
+            border-color: #b6d8b8;
+            cursor: pointer;
+        }
+        .inspector-subhead-green:hover {
+            background: #c8e2c9;
+        }
+        .inspector-subhead-title {
+            flex: 1 1 auto;
+        }
+        .inspector-subhead-meta {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+            opacity: 0.85;
+            font-variant-numeric: tabular-nums;
+        }
+        .inspector-subhead-chevron {
+            flex: 0 0 auto;
+            transition: transform 0.15s;
+        }
+
+        /* ── Hints editor ─────────────────────────────────────────── */
+        .hints-savebar {
+            position: sticky;
+            top: 0;
+            background: #fff8e1;
+            border-bottom: 1px solid #ffe082;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 5;
+        }
+        .hints-dirty-indicator {
+            flex: 1 1 auto;
+            font-size: 12px;
+            color: #7a5c00;
+            font-weight: 500;
+        }
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        .hints-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0;
+        }
+        .hints-mb {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            overflow: hidden;
+        }
+        .hints-mb.is-open {
+            border-color: #2176AE;
+        }
+        .hints-mb-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            background: #f4f6f9;
+            user-select: none;
+            border-bottom: 1px solid transparent;
+        }
+        .hints-mb.is-open .hints-mb-header {
+            background: #e8f0f8;
+            border-bottom-color: #c7dbec;
+        }
+        .hints-mb-header:hover {
+            background: #e8f0f8;
+        }
+        .hints-mb-chevron {
+            width: 12px; height: 12px;
+            transition: transform 0.15s;
+            color: #666;
+            flex: 0 0 auto;
+        }
+        .hints-mb.is-open .hints-mb-chevron {
+            transform: rotate(90deg);
+        }
+        .hints-mb-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 13px;
+            color: #0D3B66;
+            min-width: 32px;
+        }
+        .hints-mb-label {
+            flex: 1 1 auto;
+            font-size: 12px;
+            color: #444;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .hints-mb-dirty-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #e07b00;
+            flex: 0 0 auto;
+            display: none;
+        }
+        .hints-mb.is-dirty .hints-mb-dirty-dot {
+            display: inline-block;
+        }
+        .hints-mb-body {
+            display: none;
+            padding: 10px;
+        }
+        .hints-mb.is-open .hints-mb-body {
+            display: block;
+        }
+        .hints-group {
+            margin-bottom: 12px;
+        }
+        .hints-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2176AE;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 3px;
+        }
+        .hints-field {
+            margin-bottom: 8px;
+        }
+        .hints-field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .hints-field-input {
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            font-size: 12px;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: #fafafa;
+            resize: vertical;
+            min-height: 50px;
+            line-height: 1.4;
+        }
+        .hints-field-input:focus {
+            outline: none;
+            border-color: #2176AE;
+            background: #fff;
+        }
+        .hints-field-input.is-empty {
+            background: #fffbe6;
+            border-style: dashed;
+        }
+        .dialog-label {
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text, #333);
+        }
+        .dialog-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            background: #fafafa;
+        }
+        .dialog-input:focus {
+            outline: none;
+            border-color: #2176AE;
+            background: #fff;
+        }
+        .dialog-status {
+            margin-top: 12px;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .dialog-status.status-ok {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #1b5e20;
+        }
+        .dialog-status.status-warn {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            color: #7a5c00;
+        }
+        .dialog-status.status-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #0d47a1;
+        }
+        .dialog-status.status-error {
+            background: #fdecea;
+            border: 1px solid #e57373;
+            color: #7f0000;
+        }
+        /* ─── Classificatie-sectie ─────────────────────────────────── */
+        /* ── Hints sectie: identieke layout als classificatie ── */
+        .hints-section {
+            font-size: 12px;
+        }
+        .hints-section-body[hidden] { display: none; }
+        .hints-section-body {
+            padding-top: 6px;
+        }
+
+        .cl-section {
+            font-size: 12px;
+        }
+        .cl-section.cl-locked {
+            opacity: 0.6;
+        }
+        /* Wanneer locked, blokkeer alleen de invoer-elementen, niet de
+           toggle-headers van de harmonica-blokken (die mogen altijd open/dicht). */
+        .cl-section.cl-locked .cl-input,
+        .cl-section.cl-locked .cl-select,
+        .cl-section.cl-locked .cl-tag-input,
+        .cl-section.cl-locked .cl-seg,
+        .cl-section.cl-locked .cl-pill,
+        .cl-section.cl-locked .cl-year-btn,
+        .cl-section.cl-locked .cl-diff-bar,
+        .cl-section.cl-locked .cl-diff-bars,
+        .cl-section.cl-locked .cl-tags {
+            pointer-events: none;
+        }
+        .cl-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cl-head-title {
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cl-progress {
+            font-size: 11px;
+            color: #ae7a15;
+            background: rgba(174, 122, 21, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+        .cl-body[hidden] { display: none; }
+
+        /* Harmonica-blokken (cl-mb) — lichtgroen, analoog aan hints-mb (blauw) */
+        .cl-body {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-top: 6px;
+        }
+        .cl-mb {
+            border: 1px solid #cfe5cf;
+            border-radius: 4px;
+            background: #fff;
+            overflow: hidden;
+        }
+        .cl-mb.is-open {
+            border-color: #2E7D32;
+        }
+        .cl-mb-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            background: #ecf5ec;
+            user-select: none;
+            border-bottom: 1px solid transparent;
+        }
+        .cl-mb.is-open .cl-mb-header {
+            background: #d8ecd9;
+            border-bottom-color: #b6d8b8;
+        }
+        .cl-mb-header:hover {
+            background: #d8ecd9;
+        }
+        .cl-mb-chevron {
+            width: 12px; height: 12px;
+            transition: transform 0.15s;
+            color: #2E7D32;
+            flex: 0 0 auto;
+        }
+        .cl-mb.is-open .cl-mb-chevron {
+            transform: rotate(90deg);
+        }
+        .cl-mb-title {
+            flex: 1 1 auto;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .cl-mb-meta {
+            font-size: 11px;
+            color: #1a1a1a;
+            font-variant-numeric: tabular-nums;
+        }
+        .cl-mb-body {
+            display: none;
+            padding: 10px;
+            background: #fafdfa;
+        }
+        .cl-mb.is-open .cl-mb-body {
+            display: block;
+        }
+
+        /* Tellers (statistieken-blok bovenin) */
+        .cl-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            font-size: 11.5px;
+        }
+        .cl-stats-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 0.5px dotted #d6e6d8;
+            padding: 3px 0;
+        }
+        .cl-stats-row.cl-stats-total {
+            font-weight: 600;
+            color: #1a1a1a;
+            border-bottom-color: #2E7D32;
+            padding-bottom: 4px;
+            margin-bottom: 2px;
+        }
+        .cl-stats-key {
+            color: #1a1a1a;
+        }
+        .cl-stats-val {
+            font-family: 'JetBrains Mono', monospace;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+        .cl-stats-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1B5E20;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            grid-column: 1 / -1;
+        }
+            margin-bottom: 4px;
+            grid-column: 1 / -1;
+        }
+        .cl-stats-section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* Oude .cl-group nu nog gebruikt door bestaande HTML — laat staan
+           maar geef het lichte achtergrond zodat ze niet "los" zweven binnen
+           een cl-mb-body. */
+        .cl-group {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .cl-group:last-child { border-bottom: none; }
+        .cl-group-title {
+            font-size: 10px;
+            font-weight: 500;
+            color: #888780;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+        .cl-group-title.cl-collapsible {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .cl-row { margin-bottom: 8px; }
+        .cl-row:last-child { margin-bottom: 0; }
+        .cl-row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .cl-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .cl-input, .cl-select {
+            height: 28px;
+            width: 100%;
+            background: #fafafa;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 0 8px;
+            font-size: 12px;
+            font-family: inherit;
+            color: #1a1a1a;
+            box-sizing: border-box;
+        }
+        .cl-input.cl-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .cl-input:focus, .cl-select:focus {
+            outline: none;
+            border-color: #2E7D32;
+            background: #fff;
+        }
+        textarea.cl-input {
+            height: auto;
+            min-height: 50px;
+            line-height: 1.4;
+            padding: 6px 8px;
+            resize: vertical;
+        }
+        /* Segmented controls: RTTI, ref-niveau */
+        .cl-seg {
+            display: flex;
+            height: 28px;
+            border: 0.5px solid #d4cfc0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .cl-seg-opt {
+            flex: 1;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: #1a1a1a;
+            border-right: 0.5px solid #d4cfc0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cl-seg-opt:last-child { border-right: none; }
+        .cl-seg-opt.cl-active {
+            background: #ae7a15;
+            color: #fff;
+        }
+        .cl-seg-opt:hover:not(.cl-active) { background: #f6f4ed; }
+        /* Difficulty bars */
+        .cl-diff-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .cl-diff-value {
+            font-size: 11px;
+            font-weight: 500;
+            color: #ae7a15;
+            font-variant-numeric: tabular-nums;
+        }
+        .cl-diff-bars {
+            display: flex;
+            gap: 4px;
+        }
+        .cl-diff-bar {
+            flex: 1;
+            height: 8px;
+            background: #e8e3d4;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .cl-diff-bar.cl-active { background: #ae7a15; }
+        .cl-diff-bar:hover { background: #c9beaa; }
+        .cl-diff-bar.cl-active:hover { background: #ae7a15; }
+        /* Year picker grid */
+        .cl-year-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+        }
+        .cl-year-btn {
+            height: 26px;
+            border: 0.5px solid #d4cfc0;
+            border-radius: 3px;
+            background: #fff;
+            font-size: 11px;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 0;
+        }
+        .cl-year-btn.cl-active {
+            border-color: #ae7a15;
+            background: #ae7a15;
+            color: #fff;
+            font-weight: 500;
+        }
+        /* Stroom pills */
+        .cl-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        .cl-pill {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 0.5px solid #d4cfc0;
+            color: #1a1a1a;
+            background: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cl-pill.cl-active {
+            border-color: #ae7a15;
+            background: #ae7a15;
+            color: #fff;
+            font-weight: 500;
+        }
+        /* Tags */
+        .cl-tags {
+            min-height: 28px;
+            background: #fff;
+            border: 0.5px solid #d4cfc0;
+            border-radius: 4px;
+            padding: 4px 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+        .cl-tag {
+            background: rgba(174, 122, 21, 0.12);
+            color: #6b4a0d;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .cl-tag-x {
+            opacity: 0.5;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .cl-tag-x:hover { opacity: 1; }
+        .cl-tag-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 80px;
+            padding: 2px 0;
+            color: inherit;
+        }
+        .cl-tag-input::placeholder { color: #b4b2a9; }
+        /* Administratie */
+        .cl-adm-summary {
+            font-size: 10.5px;
+            color: #b4b2a9;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+        .cl-adm-fields { padding-top: 6px; }
+        .cl-adm-fields textarea.cl-input {
+            height: auto;
+            min-height: 50px;
+            padding: 6px 8px;
+            line-height: 1.4;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 44 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor">
+                    <!-- Wortelteken: kort opstapje, dan haakje omhoog, dan horizontale bovenbalk -->
+                    <path d="M 2 24 L 7 22 L 12 36 L 17 8 L 42 8"
+                          stroke-width="1.75" stroke-linejoin="miter" stroke-linecap="round"/>
+                    <!-- Breuk onder de wortel: iets lager gecentreerd -->
+                    <!-- Teller-vakje -->
+                    <rect x="22" y="15.5" width="13" height="8" rx="1"
+                          stroke-width="1" stroke-dasharray="2 1.5"/>
+                    <!-- Deelstreep -->
+                    <line x1="21" y1="26.5" x2="36" y2="26.5" stroke-width="1.25"/>
+                    <!-- Noemer-vakje -->
+                    <rect x="22" y="29.5" width="13" height="8" rx="1"
+                          stroke-width="1" stroke-dasharray="2 1.5"/>
+                </svg>
+            </span>
+            <h1>ForMath <span class="brand-sub">Authortool: invoer opgaven</span></h1>
+        </div>
+        <button type="button"
+                class="header-settings-btn header-help-btn"
+                id="btn-header-help"
+                aria-label="Help"
+                title="Help — toon labels bij elk onderdeel"
+                onclick="openHelpOverlay()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </button>
+        <button type="button"
+                class="header-settings-btn"
+                id="btn-header-settings"
+                aria-label="Instellingen"
+                title="Instellingen"
+                onclick="openSettingsDialog()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
+    </header>
+
+    <main class="app-main">
+        <!-- Linker inspector: opgavenbeheer -->
+        <aside class="opgave-lijst" id="opgave-lijst" aria-label="Opgavenbeheer">
+            <div class="inspector-head">
+                <div>
+                    <h2 class="inspector-title">Opgaven</h2>
+                    <div class="inspector-subtitle" id="ol-count">…</div>
+                </div>
+                <button type="button"
+                        class="inspector-collapse-btn"
+                        id="btn-ol-collapse"
+                        aria-label="Opgaven inklappen"
+                        aria-expanded="true"
+                        aria-controls="ol-body"
+                        title="Opgaven inklappen"
+                        onclick="toggleOpgaveLijst()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                         stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <polyline points="9 3 5 7 9 11"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="inspector-body" id="ol-body">
+                <div class="ol-placeholder" id="ol-placeholder">
+                    Geen opgaven gevonden in <code class="mono" id="ol-placeholder-dir">…</code>
+                </div>
+                <ul class="ol-list" id="ol-list" role="listbox" aria-label="Opgaven"></ul>
+            </div>
+        </aside>
+
+        <button type="button"
+                class="inspector-rail"
+                id="ol-rail"
+                aria-label="Opgaven openen"
+                title="Opgaven openen"
+                onclick="toggleOpgaveLijst()"
+                hidden>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                 stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <polyline points="5 3 9 7 5 11"/>
+            </svg>
+            <span class="inspector-rail-label">Opgaven</span>
+        </button>
+
+        <section class="input-panel">
+            <div class="input-panel-head">
+                <!-- Statische labels: tonen de huidige metadata van de opgave.
+                     De drie oude selects worden niet meer als invoer gebruikt,
+                     maar blijven verborgen aanwezig zodat bestaande JS-code
+                     die hen leest niet stuk gaat. Invoer gebeurt nu via het
+                     "Opgave-metadata"-modaal dat opent bij Opslaan. -->
+                <div class="meta-labels" id="meta-labels-row">
+                    <span class="meta-label-pair">
+                        <span class="meta-label-key">Soort:</span>
+                        <span class="meta-label-val" id="meta-soort">—</span>
+                    </span>
+                    <span class="meta-label-pair">
+                        <span class="meta-label-key">Onderwijstype:</span>
+                        <span class="meta-label-val" id="meta-onderwijstype">—</span>
+                    </span>
+                    <span class="meta-label-pair">
+                        <span class="meta-label-key">Niveau:</span>
+                        <span class="meta-label-val" id="meta-onderwijsniveau">—</span>
+                    </span>
+                    <span class="meta-label-pair">
+                        <span class="meta-label-key">Opdracht:</span>
+                        <span class="meta-label-val" id="meta-opdracht">—</span>
+                    </span>
+                    <span class="meta-label-pair">
+                        <span class="meta-label-key">Productietype:</span>
+                        <span class="meta-label-val" id="meta-productie">—</span>
+                    </span>
+                </div>
+                <!-- Verborgen selects: behouden voor backward-compat met bestaande
+                     code die deze elementen leest (onSoortOpgaveChange/etc).
+                     De waardes worden voortaan vanuit het metadata-modaal gezet. -->
+                <select id="soort-opgave-select" hidden
+                        onchange="onSoortOpgaveChange(this.value)">
+                    <option value="rekenen_getallen">Rekenen met getallen</option>
+                    <option value="rekenen_letters">Rekenen met letters</option>
+                    <option value="simpele_vergelijkingen">Simpele vergelijkingen</option>
+                </select>
+                <select id="productie-select" hidden
+                        onchange="onProductieChange(this.value)">
+                    <option value="enkelvoudig">Enkelvoudig</option>
+                    <option value="sjabloon">Sjabloon</option>
+                </select>
+                <select id="opdracht-select" hidden
+                        onchange="onOpdrachtChange(this.value)">
+                    <option value="reken_uit">Reken uit</option>
+                    <option value="vereenvoudig">Vereenvoudig</option>
+                </select>
+                <div class="mode-toggle" role="group" aria-label="Invoermodus">
+                    <button id="mode-math" class="mode-btn is-active" data-mode="math"
+                            onclick="setMode('math')" type="button">MathLive</button>
+                    <button id="mode-text" class="mode-btn" data-mode="text"
+                            onclick="setMode('text')" type="button">Tekst</button>
+                </div>
+            </div>
+
+            <!-- Quick-buttons: snelle invoer voor wortels, machten en breuken.
+                 Alleen zichtbaar in math-modus (verborgen via JS in tekst-modus).
+                 Klikken voegt een LaTeX-snippet in op cursor-positie en zet de
+                 focus terug op het math-field. -->
+            <div id="quick-buttons" class="quick-buttons">
+                <!-- Wortel met geheel getal als radicand -->
+                <button type="button" class="qb" data-insert="\sqrt[#?]{#0}" title="Wortel met geheel getal (vul index en radicand in)">
+                    <span class="qb-pre">▢</span><span class="qb-icon">√</span><span class="qb-sub">▢</span>
+                </button>
+                <!-- Wortel met breuk als radicand -->
+                <button type="button" class="qb" data-insert="\sqrt[#?]{\frac{#0}{#?}}" title="Wortel met breuk als radicand">
+                    <span class="qb-pre">▢</span><span class="qb-icon">√</span><span class="qb-frac">
+                        <span class="qb-frac-top">▢</span>
+                        <span class="qb-frac-bot">▢</span>
+                    </span>
+                </button>
+                <span class="qb-sep"></span>
+                <!-- Macht: hokje met kwadraat -->
+                <button type="button" class="qb" data-insert="{#0}^{2}" title="Kwadraat (vul grondtal in)">
+                    <span class="qb-base">▢</span><span class="qb-sup">²</span>
+                </button>
+                <!-- Macht: hokje met algemene exponent -->
+                <button type="button" class="qb" data-insert="{#0}^{#?}" title="Macht (vul grondtal en exponent in)">
+                    <span class="qb-base">▢</span><span class="qb-sup">▢</span>
+                </button>
+                <span class="qb-sep"></span>
+                <!-- Breuk -->
+                <button type="button" class="qb" data-insert="\frac{#0}{#?}" title="Breuk">
+                    <span class="qb-frac">
+                        <span class="qb-frac-top">▢</span>
+                        <span class="qb-frac-bot">▢</span>
+                    </span>
+                </button>
+                <span class="qb-sep"></span>
+                <!-- π met afgeronde decimalen (default 2). Auteur kan in
+                     het invoerveld het subscript wijzigen om meer/minder
+                     decimalen te kiezen. -->
+                <button type="button" class="qb"
+                        data-insert="\pi_{2}"
+                        title="π met afgeronde decimalen (klik op subscript om aantal te wijzigen)">
+                    <span class="qb-pi">π</span>
+                </button>
+            </div>
+
+            <div class="input-field-wrap">
+                <math-field id="math-input"
+                    virtual-keyboard-mode="manual"
+                    smart-mode
+                    placeholder="Typ hier je opgave">
+                </math-field>
+                <input type="text" id="text-input"
+                    placeholder="Plak hier de expressie, bijv: [(3^2)*(12-9)^3]:…"
+                    autocomplete="off" spellcheck="false">
+            </div>
+
+            <div class="action-row">
+                <button id="btn-ok" class="btn btn-primary" onclick="processExpression()" disabled>
+                    <span class="btn-label">Parse</span>
+                    <span class="btn-kbd">↵</span>
+                </button>
+                <button id="btn-json" class="btn btn-secondary" onclick="openMetadataDialog()" disabled>
+                    Opslaan
+                </button>
+                <!-- Zichtbaar alleen als een opgave geselecteerd is -->
+                <button id="btn-edit" class="btn btn-ghost" onclick="toggleEdit()"
+                        type="button" hidden>
+                    Edit toestaan
+                </button>
+
+                <!-- Spacer: duwt onderstaande knoppen naar rechts -->
+                <div class="action-spacer"></div>
+
+                <button id="btn-clear" class="btn btn-ghost" onclick="clearAll()" disabled>
+                    Nieuw
+                </button>
+                <div id="status" class="status"></div>
+            </div>
+        </section>
+
+        <section class="result-panel">
+            <div class="result-head">
+                <span class="result-title">Schema</span>
+                <div class="view-toggle" role="group" aria-label="Weergave">
+                    <button id="view-svg" class="view-btn is-active"
+                            onclick="setView('svg')" type="button">SVG</button>
+                    <button id="view-json" class="view-btn"
+                            onclick="setView('json')" type="button">JSON</button>
+                </div>
+                <div class="zoom-controls" aria-label="Zoomregelingen">
+                    <button class="zoom-btn" onclick="zoomOut()" title="Uitzoomen" type="button">−</button>
+                    <span class="zoom-label" id="zoom-level">100%</span>
+                    <button class="zoom-btn" onclick="zoomIn()" title="Inzoomen" type="button">+</button>
+                    <button class="zoom-btn zoom-btn-wide" onclick="zoomFit()" title="Passend maken" type="button">Fit</button>
+                </div>
+            </div>
+
+            <div id="svg-wrapper">
+                <div id="svg-container" class="is-empty">
+                    <div id="placeholder-text">
+                        <span class="placeholder-big">Nog geen schema</span>
+                        <span class="placeholder-sub">Typ een expressie en druk op <kbd>Parse</kbd></span>
+                    </div>
+                    <div id="svg-inner"></div>
+                </div>
+                <pre id="json-view" class="json-view mono" hidden></pre>
+            </div>
+
+            <aside class="pipeline-info" id="pipeline-info" hidden>
+                <dl>
+                    <dt class="info-label-copy" data-target="info-tekst"
+                        title="Klik om te kopiëren">Expressie</dt>
+                    <dd id="info-tekst" class="mono"></dd>
+                    <dt class="info-label-copy" data-target="info-latex"
+                        title="Klik om te kopiëren">LaTeX voor export</dt>
+                    <dd id="info-latex" class="mono"></dd>
+                </dl>
+            </aside>
+        </section>
+
+        <aside class="inspector" id="inspector" aria-label="Inspector">
+            <div class="inspector-head">
+                <div>
+                    <h2 class="inspector-title">Didactiek &amp; Classificatie</h2>
+                    <div class="inspector-subtitle" id="hints-subtitle">per opgave</div>
+                </div>
+                <button type="button"
+                        class="inspector-collapse-btn"
+                        id="btn-inspector-collapse"
+                        aria-label="Inspector inklappen"
+                        aria-expanded="true"
+                        aria-controls="inspector-body"
+                        title="Inspector inklappen"
+                        onclick="toggleInspector()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                         stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <polyline points="5 3 9 7 5 11"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="inspector-body" id="inspector-body">
+                <!-- Opslaan-balk (alleen zichtbaar als er wijzigingen zijn) -->
+                <div class="hints-savebar" id="hints-savebar" hidden>
+                    <span class="hints-dirty-indicator" id="hints-dirty-count">…</span>
+                    <button class="btn btn-primary btn-small" id="btn-hints-save"
+                            onclick="saveHintsEdits()" type="button" disabled>
+                        Opslaan
+                    </button>
+                    <button class="btn btn-ghost btn-small"
+                            onclick="discardHintsEdits()" type="button">
+                        Ongedaan maken
+                    </button>
+                </div>
+
+                <!-- Subkop: Hints & Feedback -->
+                <div class="hints-section" id="hints-section">
+                    <div class="inspector-subhead inspector-subhead-blue"
+                         onclick="toggleHintsSection()">
+                        <span class="inspector-subhead-title">Hints &amp; Feedback</span>
+                        <span class="inspector-subhead-meta" id="hints-mb-count">— mathblocks</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10"
+                             id="hints-section-chevron" class="inspector-subhead-chevron"
+                             aria-hidden="true">
+                            <path d="M2 3 L5 7 L8 3" stroke="currentColor"
+                                  stroke-width="1.4" fill="none"
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="hints-section-body" id="hints-section-body">
+                        <!-- Accordeon-lijst van mathblocks met bewerkbare hints -->
+                        <div class="hints-accordion" id="hints-accordion"></div>
+                    </div>
+                </div>
+
+                <!-- Classificatie-sectie -->
+                <div class="cl-section" id="cl-section" hidden>
+                    <div class="inspector-subhead inspector-subhead-green" onclick="toggleClSection()">
+                        <span class="inspector-subhead-title">Classificatie</span>
+                        <span class="inspector-subhead-meta" id="cl-progress">0 / 12</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10"
+                             id="cl-chevron" class="inspector-subhead-chevron"
+                             aria-hidden="true">
+                            <path d="M2 3 L5 7 L8 3" stroke="currentColor"
+                                  stroke-width="1.4" fill="none"
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+
+                    <div class="cl-body" id="cl-body">
+
+                        <!-- Statistieken (tellers) — read-only blok bovenaan -->
+                        <div class="cl-mb" id="cl-mb-stats" data-cl-group="stats">
+                            <div class="cl-mb-header" onclick="toggleClGroup('stats')">
+                                <svg class="cl-mb-chevron" viewBox="0 0 12 12" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round"
+                                     aria-hidden="true">
+                                    <polyline points="4 2 8 6 4 10"/>
+                                </svg>
+                                <span class="cl-mb-title">Statistieken</span>
+                                <span class="cl-mb-meta" id="cl-stats-summary">—</span>
+                            </div>
+                            <div class="cl-mb-body">
+                                <div class="cl-stats-grid" id="cl-stats-grid">
+                                    <div class="cl-stats-section-title">Mathblocks</div>
+                                    <div class="cl-stats-row cl-stats-total">
+                                        <span class="cl-stats-key">Totaal</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-total">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">binair (+, ×, :)</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-binary">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">manifold</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-manifold">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">matroesjka</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-matroesjka">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">vereenvoudigen</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-simplify">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">gemengd getal</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-mixed">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">macht</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-power">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">wortel</span>
+                                        <span class="cl-stats-val" id="cl-stat-mb-root">—</span>
+                                    </div>
+
+                                    <div class="cl-stats-section-title">Externe inputs</div>
+                                    <div class="cl-stats-row cl-stats-total">
+                                        <span class="cl-stats-key">Totaal</span>
+                                        <span class="cl-stats-val" id="cl-stat-in-total">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">gehele getallen</span>
+                                        <span class="cl-stats-val" id="cl-stat-in-int">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">breuken</span>
+                                        <span class="cl-stats-val" id="cl-stat-in-frac">—</span>
+                                    </div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">decimale getallen</span>
+                                        <span class="cl-stats-val" id="cl-stat-in-dec">—</span>
+                                    </div>
+
+                                    <div class="cl-stats-section-title">Stappen</div>
+                                    <div class="cl-stats-row">
+                                        <span class="cl-stats-key">aantal stappen</span>
+                                        <span class="cl-stats-val" id="cl-stat-steps">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inhoud -->
+                        <div class="cl-mb" id="cl-mb-inhoud" data-cl-group="inhoud">
+                            <div class="cl-mb-header" onclick="toggleClGroup('inhoud')">
+                                <svg class="cl-mb-chevron" viewBox="0 0 12 12" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round"
+                                     aria-hidden="true">
+                                    <polyline points="4 2 8 6 4 10"/>
+                                </svg>
+                                <span class="cl-mb-title">Inhoud</span>
+                            </div>
+                            <div class="cl-mb-body">
+                                <div class="cl-row">
+                                    <label class="cl-label" for="cl-domein">Domein</label>
+                                    <select class="cl-select" id="cl-domein">
+                                        <option value="">—</option>
+                                        <option value="getallen">getallen</option>
+                                        <option value="algebra">algebra</option>
+                                        <option value="meetkunde">meetkunde</option>
+                                        <option value="verbanden">verbanden</option>
+                                        <option value="differentiaalrekening">differentiaalrekening</option>
+                                        <option value="goniometrie">goniometrie</option>
+                                        <option value="statistiek">statistiek</option>
+                                        <option value="kansrekening">kansrekening</option>
+                                        <option value="analytische_meetkunde">analytische meetkunde</option>
+                                        <option value="rijen">rijen</option>
+                                        <option value="logica">logica</option>
+                                    </select>
+                                </div>
+                                <div class="cl-row-2col">
+                                    <div>
+                                        <label class="cl-label" for="cl-onderwerp">Onderwerp</label>
+                                        <input type="text" class="cl-input cl-mono"
+                                               id="cl-onderwerp" placeholder="bv. breuken"
+                                               list="cl-onderwerp-list" />
+                                        <datalist id="cl-onderwerp-list"></datalist>
+                                    </div>
+                                    <div>
+                                        <label class="cl-label" for="cl-subonderwerp">Subonderwerp</label>
+                                        <input type="text" class="cl-input cl-mono"
+                                               id="cl-subonderwerp" placeholder="bv. optellen"
+                                               list="cl-subonderwerp-list" />
+                                        <datalist id="cl-subonderwerp-list"></datalist>
+                                    </div>
+                                </div>
+                                <div class="cl-row">
+                                    <label class="cl-label">Tags</label>
+                                    <div class="cl-tags" id="cl-tags-container"
+                                         onclick="document.getElementById('cl-tag-input').focus()">
+                                        <input type="text" class="cl-tag-input"
+                                               id="cl-tag-input"
+                                               placeholder="+ tag…"
+                                               list="cl-tag-list" />
+                                        <datalist id="cl-tag-list"></datalist>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cognitie -->
+                        <div class="cl-mb" id="cl-mb-cognitie" data-cl-group="cognitie">
+                            <div class="cl-mb-header" onclick="toggleClGroup('cognitie')">
+                                <svg class="cl-mb-chevron" viewBox="0 0 12 12" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round"
+                                     aria-hidden="true">
+                                    <polyline points="4 2 8 6 4 10"/>
+                                </svg>
+                                <span class="cl-mb-title">Cognitie</span>
+                            </div>
+                            <div class="cl-mb-body">
+                                <div class="cl-row-2col">
+                                    <div>
+                                        <label class="cl-label" for="cl-type">Type</label>
+                                        <select class="cl-select" id="cl-type">
+                                            <option value="">—</option>
+                                            <option value="procedureel">procedureel</option>
+                                            <option value="gestructureerd">gestructureerd</option>
+                                            <option value="toepassing">toepassing</option>
+                                            <option value="bewijs">bewijs</option>
+                                            <option value="onderzoek">onderzoek</option>
+                                            <option value="redeneren">redeneren</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="cl-label">RTTI</label>
+                                        <div class="cl-seg" id="cl-rtti">
+                                            <div class="cl-seg-opt" data-value="R">R</div>
+                                            <div class="cl-seg-opt" data-value="T1">T1</div>
+                                            <div class="cl-seg-opt" data-value="T2">T2</div>
+                                            <div class="cl-seg-opt" data-value="I">I</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cl-row">
+                                    <div class="cl-diff-row">
+                                        <label class="cl-label" style="margin-bottom:0;">Moeilijkheid</label>
+                                        <span class="cl-diff-value" id="cl-diff-value">—</span>
+                                    </div>
+                                    <div class="cl-diff-bars" id="cl-diff-bars">
+                                        <div class="cl-diff-bar" data-value="1"></div>
+                                        <div class="cl-diff-bar" data-value="2"></div>
+                                        <div class="cl-diff-bar" data-value="3"></div>
+                                        <div class="cl-diff-bar" data-value="4"></div>
+                                        <div class="cl-diff-bar" data-value="5"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doelgroep -->
+                        <div class="cl-mb" id="cl-mb-doelgroep" data-cl-group="doelgroep">
+                            <div class="cl-mb-header" onclick="toggleClGroup('doelgroep')">
+                                <svg class="cl-mb-chevron" viewBox="0 0 12 12" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round"
+                                     aria-hidden="true">
+                                    <polyline points="4 2 8 6 4 10"/>
+                                </svg>
+                                <span class="cl-mb-title">Doelgroep</span>
+                            </div>
+                            <div class="cl-mb-body">
+                                <div class="cl-row">
+                                    <label class="cl-label">Leerjaar</label>
+                                    <div class="cl-year-grid" id="cl-leerjaar">
+                                        <button type="button" class="cl-year-btn" data-value="1">1</button>
+                                        <button type="button" class="cl-year-btn" data-value="2">2</button>
+                                        <button type="button" class="cl-year-btn" data-value="3">3</button>
+                                        <button type="button" class="cl-year-btn" data-value="4">4</button>
+                                        <button type="button" class="cl-year-btn" data-value="5">5</button>
+                                        <button type="button" class="cl-year-btn" data-value="6">6</button>
+                                    </div>
+                                </div>
+                                <div class="cl-row">
+                                    <label class="cl-label">Stroom</label>
+                                    <div class="cl-pills" id="cl-stroom">
+                                        <span class="cl-pill" data-value="vmbo_bb">vmbo-bb</span>
+                                        <span class="cl-pill" data-value="vmbo_kb">vmbo-kb</span>
+                                        <span class="cl-pill" data-value="vmbo_gt">vmbo-gt</span>
+                                        <span class="cl-pill" data-value="havo">havo</span>
+                                        <span class="cl-pill" data-value="vwo">vwo</span>
+                                        <span class="cl-pill" data-value="wiskunde_a">wisk-A</span>
+                                        <span class="cl-pill" data-value="wiskunde_b">wisk-B</span>
+                                        <span class="cl-pill" data-value="wiskunde_c">wisk-C</span>
+                                        <span class="cl-pill" data-value="wiskunde_d">wisk-D</span>
+                                    </div>
+                                </div>
+                                <div class="cl-row-2col">
+                                    <div>
+                                        <label class="cl-label">Ref. niveau</label>
+                                        <div class="cl-seg" id="cl-refniveau">
+                                            <div class="cl-seg-opt" data-value="1F">1F</div>
+                                            <div class="cl-seg-opt" data-value="1S">1S</div>
+                                            <div class="cl-seg-opt" data-value="2F">2F</div>
+                                            <div class="cl-seg-opt" data-value="2S">2S</div>
+                                            <div class="cl-seg-opt" data-value="3F">3F</div>
+                                            <div class="cl-seg-opt" data-value="3S">3S</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="cl-label" for="cl-examendomein">Examen-dom.</label>
+                                        <select class="cl-select" id="cl-examendomein">
+                                            <option value="">—</option>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
+                                            <option value="G">G</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="cl-row">
+                                    <label class="cl-label" for="cl-refdomein">Ref. domein</label>
+                                    <select class="cl-select" id="cl-refdomein">
+                                        <option value="">—</option>
+                                        <option value="getallen">getallen</option>
+                                        <option value="verhoudingen">verhoudingen</option>
+                                        <option value="meten_meetkunde">meten en meetkunde</option>
+                                        <option value="verbanden">verbanden</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Administratie -->
+                        <div class="cl-mb" id="cl-mb-administratie" data-cl-group="administratie">
+                            <div class="cl-mb-header" onclick="toggleClGroup('administratie')">
+                                <svg class="cl-mb-chevron" viewBox="0 0 12 12" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round"
+                                     aria-hidden="true">
+                                    <polyline points="4 2 8 6 4 10"/>
+                                </svg>
+                                <span class="cl-mb-title">Administratie</span>
+                                <span class="cl-mb-meta" id="cl-adm-summary">—</span>
+                            </div>
+                            <div class="cl-mb-body">
+                                <div class="cl-row-2col">
+                                    <div>
+                                        <label class="cl-label" for="cl-bron">Bron</label>
+                                        <input type="text" class="cl-input cl-mono"
+                                               id="cl-bron" placeholder="eigen" />
+                                    </div>
+                                    <div>
+                                        <label class="cl-label" for="cl-auteur">Auteur</label>
+                                        <input type="text" class="cl-input cl-mono"
+                                               id="cl-auteur" placeholder="HNL" />
+                                    </div>
+                                </div>
+                                <div class="cl-row">
+                                    <label class="cl-label" for="cl-opmerkingen">Opmerkingen</label>
+                                    <textarea class="cl-input" id="cl-opmerkingen"
+                                              placeholder="Toelichting bij niet-evidente keuzes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Randvoorwaarden-sectie (derde harmonica, mosterd) -->
+                <div class="rv-section" id="rv-section" hidden>
+                    <div class="inspector-subhead inspector-subhead-amber" onclick="toggleRvSection()">
+                        <span class="inspector-subhead-title">Randvoorwaarden</span>
+                        <span class="inspector-subhead-meta" id="rv-progress"></span>
+                        <svg width="10" height="10" viewBox="0 0 10 10"
+                             id="rv-chevron" class="inspector-subhead-chevron"
+                             aria-hidden="true">
+                            <path d="M2 3 L5 7 L8 3" stroke="currentColor"
+                                  stroke-width="1.4" fill="none"
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="rv-body" id="rv-body" hidden>
+                        <div class="rv-row">
+                            <span class="rv-label">1. Antwoord in breuken</span>
+                            <div class="rv-control">
+                                <label class="rv-radio"><input type="radio" name="rv-breuken" value="ja"><span>Ja</span></label>
+                                <label class="rv-radio"><input type="radio" name="rv-breuken" value="nee"><span>Nee</span></label>
+                            </div>
+                        </div>
+                        <div class="rv-row">
+                            <span class="rv-label">2. Antwoord in decimalen</span>
+                            <div class="rv-control">
+                                <label class="rv-radio"><input type="radio" name="rv-decimalen" value="ja"><span>Ja</span></label>
+                                <label class="rv-radio"><input type="radio" name="rv-decimalen" value="nee"><span>Nee</span></label>
+                            </div>
+                        </div>
+                        <div class="rv-row rv-row-sub" id="rv-row-decimalen-afronden">
+                            <label class="rv-label" for="rv-input-decimalen-afronden">Afronden op decimalen achter de komma</label>
+                            <div class="rv-control">
+                                <input type="number" id="rv-input-decimalen-afronden" class="rv-input"
+                                       min="0" max="15" step="1" value="2">
+                            </div>
+                        </div>
+                        <div class="rv-row">
+                            <label class="rv-label" for="rv-input-pi-decimalen">3. Aantal decimalen voor π</label>
+                            <div class="rv-control">
+                                <input type="number" id="rv-input-pi-decimalen" class="rv-input"
+                                       min="0" max="15" step="1" value="2">
+                            </div>
+                        </div>
+                        <div class="rv-row">
+                            <span class="rv-label">4. Uitkomst als gemengd getal</span>
+                            <div class="rv-control">
+                                <label class="rv-radio"><input type="radio" name="rv-gemengd" value="ja"><span>Ja</span></label>
+                                <label class="rv-radio"><input type="radio" name="rv-gemengd" value="nee"><span>Nee</span></label>
+                            </div>
+                        </div>
+                        <div class="rv-row">
+                            <span class="rv-label">5. Hints staan aan</span>
+                            <div class="rv-control">
+                                <label class="rv-radio"><input type="radio" name="rv-hints" value="ja"><span>Ja</span></label>
+                                <label class="rv-radio"><input type="radio" name="rv-hints" value="nee"><span>Nee</span></label>
+                            </div>
+                        </div>
+                        <div class="rv-row">
+                            <span class="rv-label">6. Feedback staat aan</span>
+                            <div class="rv-control">
+                                <label class="rv-radio"><input type="radio" name="rv-feedback" value="ja"><span>Ja</span></label>
+                                <label class="rv-radio"><input type="radio" name="rv-feedback" value="nee"><span>Nee</span></label>
+                            </div>
+                        </div>
+                        <div id="rv-error" class="rv-error" hidden></div>
+                        <div class="rv-actions">
+                            <button class="btn btn-primary" type="button" onclick="saveRandvoorwaarden()">
+                                Opslaan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder als er nog geen opgave is geladen -->
+                <div class="inspector-placeholder" id="hints-placeholder">
+                    Laad een opgave of druk op <strong>Parse</strong> om hints en feedback
+                    per mathblock te zien en te bewerken.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Smalle rail zichtbaar wanneer inspector is ingeklapt -->
+        <button type="button"
+                class="inspector-rail"
+                id="inspector-rail"
+                aria-label="Inspector openen"
+                title="Inspector openen"
+                onclick="toggleInspector()"
+                hidden>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                 stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <polyline points="9 3 5 7 9 11"/>
+            </svg>
+            <span class="inspector-rail-label">Inspector</span>
+        </button>
+    </main>
+
+    <!-- Statusbalk onderaan: bewerkingen/stappen + statusberichten -->
+    <footer class="app-statusbar" id="app-statusbar">
+        <div class="statusbar-meta" id="statusbar-meta"></div>
+        <div class="statusbar-status" id="statusbar-status"></div>
+    </footer>
+
+    <div id="export-dialog" class="dialog-overlay" hidden>
+        <div class="dialog" role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="dialog-title">JSON exporteren</h2>
+                <button class="dialog-close" onclick="closeExportDialog()" aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="dialog-body">
+                <div class="dialog-row">
+                    <span class="dialog-key">Expressie</span>
+                    <code class="dialog-val mono" id="dialog-expr"></code>
+                </div>
+                <div class="dialog-row">
+                    <span class="dialog-key">Opslaan in</span>
+                    <code class="dialog-val mono" id="dialog-dir"></code>
+                </div>
+                <div id="dialog-dup-warning" class="dialog-warning" hidden>
+                    <strong>Let op</strong> — deze expressie is al eerder geëxporteerd:
+                    <ul id="dialog-dup-list"></ul>
+                    Een nieuwe export krijgt een nieuw volgnummer; bestaande bestanden blijven staan.
+                </div>
+                <!-- Keuze bij geselecteerde opgave (overschrijven of als nieuwe) -->
+                <div id="dialog-overwrite-choice" class="dialog-choice" hidden>
+                    <div class="dialog-choice-title">Geselecteerde opgave
+                        <code class="mono" id="dialog-overwrite-id"></code></div>
+                    <label class="dialog-radio">
+                        <input type="radio" name="export-mode" value="overwrite" checked>
+                        <span><strong>Bestaande wijzigen</strong>
+                            <span class="dialog-radio-help">Overschrijft dezelfde opgave met de huidige expressie</span></span>
+                    </label>
+                    <label class="dialog-radio">
+                        <input type="radio" name="export-mode" value="new">
+                        <span><strong>Als nieuwe opslaan</strong>
+                            <span class="dialog-radio-help">Maakt een opgave aan met een nieuw ID; origineel blijft staan</span></span>
+                    </label>
+                </div>
+            </div>
+            <footer class="dialog-foot">
+                <button class="btn btn-ghost" onclick="closeExportDialog()" type="button">Annuleren</button>
+                <button class="btn btn-primary" id="dialog-confirm" onclick="confirmExport()" type="button">Exporteren</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Settings-dialoog -->
+    <div id="settings-dialog" class="dialog-overlay" hidden>
+        <div class="dialog settings-modal" role="dialog" aria-labelledby="settings-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="settings-title">Instellingen</h2>
+                <button class="dialog-close" onclick="closeSettingsDialog()" aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="settings-layout">
+                <!-- Linker sidebar met menu-items -->
+                <nav class="settings-sidebar" aria-label="Instellingen-secties">
+                    <button class="settings-nav-item is-active" data-section="general" type="button">
+                        Instellingen
+                    </button>
+                    <button class="settings-nav-item" data-section="storage" type="button">
+                        Opslag Exercises Beheren
+                    </button>
+                    <button class="settings-nav-item" data-section="author" type="button">
+                        Gegevens Author
+                    </button>
+                    <button class="settings-nav-item" data-section="appearance" type="button">
+                        Appearance
+                    </button>
+                </nav>
+
+                <!-- Rechter inhoudpaneel; één sectie tegelijk zichtbaar -->
+                <div class="settings-content">
+
+                    <!-- Sectie: Instellingen (output_dir) -->
+                    <section class="settings-section is-active" data-section="general">
+                        <p class="dialog-help">
+                            De directory waarin JSON- en SVG-bestanden worden gelezen en weggeschreven.
+                            Een absoluut pad of pad met <code class="mono">~</code> is toegestaan.
+                        </p>
+                        <label for="settings-output-dir" class="dialog-label">
+                            Output directory:
+                        </label>
+                        <input type="text"
+                               id="settings-output-dir"
+                               class="dialog-input mono"
+                               placeholder="~/Desktop/ForMath_Exercise"
+                               autocomplete="off"
+                               spellcheck="false">
+                        <div class="dialog-status" id="settings-status" hidden></div>
+                        <div class="settings-section-footer">
+                            <button class="btn btn-primary" id="settings-confirm"
+                                    onclick="saveSettings()" type="button">Opslaan</button>
+                        </div>
+                    </section>
+
+                    <!-- Sectie: Opslag Exercises Beheren -->
+                    <section class="settings-section" data-section="storage">
+                        <p class="dialog-help">
+                            Beheer de folders waarin opgaven worden opgeslagen. Klik op een folder
+                            om hem te selecteren, daarna verschijnen de beschikbare acties onderaan.
+                        </p>
+                        <div class="storage-folder-list" id="storage-folder-list">
+                            <!-- folders worden door JS gerenderd -->
+                        </div>
+                        <div class="storage-actions">
+                            <button class="btn" id="storage-add"
+                                    onclick="storageActionAdd()" type="button">+ Toevoegen</button>
+                            <button class="btn" id="storage-rename" disabled
+                                    onclick="storageActionRename()" type="button">Hernoemen</button>
+                            <button class="btn" id="storage-delete" disabled
+                                    onclick="storageActionDelete()" type="button">Verwijderen</button>
+                            <button class="btn" id="storage-move" disabled
+                                    title="Niet beschikbaar zolang er maar één niveau folders is"
+                                    type="button">Verplaatsen</button>
+                            <button class="btn" id="storage-copy" disabled
+                                    onclick="storageActionCopy()" type="button">Kopiëren</button>
+                            <button class="btn" id="storage-dedicated" disabled
+                                    title="Nog niet beschikbaar"
+                                    type="button">Dedicated maken</button>
+                        </div>
+                        <div class="dialog-status" id="storage-status" hidden></div>
+                    </section>
+
+                    <!-- Sectie: Gegevens Author (placeholder) -->
+                    <section class="settings-section" data-section="author">
+                        <p class="settings-placeholder">
+                            Komt binnenkort. Hier kun je straks gegevens over de auteur invullen.
+                        </p>
+                    </section>
+
+                    <!-- Sectie: Appearance (placeholder) -->
+                    <section class="settings-section" data-section="appearance">
+                        <p class="settings-placeholder">
+                            Komt binnenkort. Hier kun je straks het uiterlijk van de Authortool aanpassen.
+                        </p>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Directory-bevestigingsdialoog (voor 'Aanmaken Ja/Nee') -->
+    <div id="settings-create-dialog" class="dialog-overlay" hidden>
+        <div class="dialog" role="dialog" aria-labelledby="settings-create-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="settings-create-title">Directory bestaat nog niet</h2>
+                <button class="dialog-close" onclick="closeSettingsCreateDialog()" aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="dialog-body">
+                <p>De directory <code class="mono" id="settings-create-path"></code> bestaat nog niet.</p>
+                <p class="dialog-help">Wil je deze nu aanmaken?</p>
+            </div>
+            <footer class="dialog-foot">
+                <button class="btn btn-ghost" onclick="closeSettingsCreateDialog()" type="button">Nee, annuleren</button>
+                <button class="btn btn-primary" id="settings-create-confirm"
+                        onclick="confirmSettingsCreate()" type="button">Ja, aanmaken</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Delete-bevestigingsdialoog -->
+    <!-- Integriteit-fout dialog. Verschijnt wanneer de server-side
+         JSON-validator structurele fouten heeft gedetecteerd. Lijst van
+         fouten + één 'Sluiten'-knop. -->
+    <div id="integrity-dialog" class="dialog-overlay" hidden>
+        <div class="dialog" role="dialog"
+             aria-labelledby="integrity-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="integrity-title">Opgave-integriteit faalt</h2>
+                <button class="dialog-close" onclick="closeIntegrityDialog()"
+                        aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="dialog-body">
+                <p class="dialog-help">
+                    De gegenereerde JSON voldoet niet aan de structurele
+                    verwachtingen. Opslaan is geblokkeerd om corruptie te
+                    voorkomen. Hieronder de gevonden problemen:
+                </p>
+                <ul class="integrity-errors" id="integrity-error-list"></ul>
+                <div class="integrity-warnings-wrap" id="integrity-warnings-wrap" hidden>
+                    <p class="dialog-help">Daarnaast werden deze
+                        waarschuwingen gemeld:</p>
+                    <ul class="integrity-warnings" id="integrity-warning-list"></ul>
+                </div>
+            </div>
+            <footer class="dialog-foot">
+                <button class="btn btn-primary"
+                        onclick="closeIntegrityDialog()" type="button">Sluiten</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Opgave-metadata modaal: opent bij klik op "Opslaan". Bevat zes
+         velden waarvan vijf dropdowns en één tekstinvoer (Notitie). -->
+    <div id="metadata-dialog" class="dialog-overlay" hidden>
+        <div class="dialog metadata-modal" role="dialog"
+             aria-labelledby="metadata-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="metadata-title">Opgave-gegevens</h2>
+                <button class="dialog-close" onclick="closeMetadataDialog()"
+                        aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="dialog-body metadata-body">
+                <div class="metadata-field">
+                    <label for="md-soort" class="dialog-label">Soort opgave</label>
+                    <select id="md-soort" class="dialog-input">
+                        <option value="rekenen_getallen">Rekenen met getallen</option>
+                        <option value="rekenen_letters">Rekenen met letters</option>
+                        <option value="simpele_vergelijkingen">Simpele vergelijkingen</option>
+                    </select>
+                </div>
+                <div class="metadata-field">
+                    <label for="md-onderwijstype" class="dialog-label">Onderwijstype</label>
+                    <select id="md-onderwijstype" class="dialog-input">
+                        <option value="basisonderwijs">Basisonderwijs</option>
+                        <option value="vmbo">vmbo</option>
+                        <option value="havo">havo</option>
+                        <option value="vwo">vwo</option>
+                        <option value="mbo">mbo</option>
+                        <option value="hbo">hbo</option>
+                        <option value="wo">wo</option>
+                    </select>
+                </div>
+                <div class="metadata-field">
+                    <label for="md-onderwijsniveau" class="dialog-label">Onderwijsniveau</label>
+                    <select id="md-onderwijsniveau" class="dialog-input">
+                        <option value="brugklas">Brugklas</option>
+                        <option value="onderbouw">Onderbouw</option>
+                        <option value="bovenbouw">Bovenbouw</option>
+                    </select>
+                </div>
+                <div class="metadata-field">
+                    <label for="md-opdracht" class="dialog-label">Opdracht voor de leerling</label>
+                    <select id="md-opdracht" class="dialog-input">
+                        <option value="reken_uit">Reken uit</option>
+                        <option value="vereenvoudig">Vereenvoudig</option>
+                    </select>
+                </div>
+                <div class="metadata-field">
+                    <label for="md-productie" class="dialog-label">Productietype</label>
+                    <select id="md-productie" class="dialog-input">
+                        <option value="enkelvoudig">Enkelvoudig</option>
+                        <option value="sjabloon">Sjabloon</option>
+                    </select>
+                </div>
+                <div class="metadata-field">
+                    <label for="md-notitie" class="dialog-label">Notitie</label>
+                    <textarea id="md-notitie" class="dialog-input"
+                              rows="3"
+                              placeholder="Optionele opmerking voor de auteur"></textarea>
+                </div>
+                <div class="dialog-status" id="metadata-status" hidden></div>
+            </div>
+            <footer class="dialog-foot">
+                <button class="btn btn-ghost"
+                        onclick="closeMetadataDialog()" type="button">Annuleren</button>
+                <button class="btn btn-primary" id="metadata-confirm"
+                        onclick="confirmMetadataSave()" type="button">Opslaan</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Context-menu voor rechtsklik op opgaven -->
+    <div id="opgave-contextmenu" class="contextmenu" hidden>
+        <button class="contextmenu-item" id="ctx-delete" type="button">
+            Verwijderen
+        </button>
+    </div>
+
+    <div id="delete-dialog" class="dialog-overlay" hidden>
+        <div class="dialog" role="dialog" aria-labelledby="delete-title" aria-modal="true">
+            <header class="dialog-head">
+                <h2 id="delete-title">Opgave naar prullenbak?</h2>
+                <button class="dialog-close" onclick="closeDeleteDialog()" aria-label="Sluiten" type="button">×</button>
+            </header>
+            <div class="dialog-body">
+                <p>Opgave <code class="mono" id="delete-id"></code> wordt verplaatst naar de Prullenbak.</p>
+                <p class="dialog-help">De opgave is daarna nog terug te vinden in de Prullenbak-folder.
+                    Vanuit daar kan hij later permanent verwijderd worden.</p>
+            </div>
+            <footer class="dialog-foot">
+                <button class="btn btn-ghost" onclick="closeDeleteDialog()" type="button">Nee, annuleren</button>
+                <button class="btn btn-primary" id="delete-confirm"
+                        onclick="confirmDelete()" type="button">Ja, naar prullenbak</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Help-overlay (sub-ronde punt 2) ─────────────────────────────────────
+         Wordt geopend door klik op de ?-knop. Een semi-transparante grijze
+         waas over het hele scherm, met labels die met dunne lijnen wijzen
+         naar UI-onderdelen. Klik ergens om te sluiten.
+
+         De inhoud (labels + lijnen) wordt door JS dynamisch geplaatst op
+         basis van de actuele DOM-positie van de doel-elementen. Het frame
+         hieronder is alleen de container.
+    -->
+    <div id="help-overlay" class="help-overlay" hidden>
+        <svg id="help-overlay-svg" class="help-overlay-svg"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+        <div id="help-overlay-labels" class="help-overlay-labels"></div>
+        <div class="help-overlay-hint">Klik ergens om te sluiten</div>
+    </div>
+
+    <script src="app.js" defer></script>
+</body>
+</html>
